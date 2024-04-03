@@ -2,7 +2,7 @@
 
 This Go library generates, signs, validates and encodes keys, such as api keys for example. This allows such keys to be 
 pre-validated in a fast and cheap way. An exemplary use case could be high throughput API endpoints that might not
-easily be rate-limited, but you still want to prevent bad actors from overloading your database by spamming requests
+be easily rate-limited, but you still want to prevent bad actors from overloading your database by spamming requests
 with random api keys.
 
 ```
@@ -11,7 +11,7 @@ go get github.com/pinax-network/signedkeys
 
 ## Example usage
 
-```
+```golang
 package main
 
 import (
