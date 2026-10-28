@@ -60,5 +60,10 @@ func (g *Generator) VerifySignature(key []byte) bool {
 		return false
 	}
 
+	// a key shorter than keyLength cannot carry a signature, and slicing it below would panic
+	if len(decodedKey) < g.keyLength {
+		return false
+	}
+
 	return g.verifier(decodedKey[:g.keyLength], decodedKey[g.keyLength:])
 }
