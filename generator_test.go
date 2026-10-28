@@ -155,6 +155,14 @@ func TestGenerator_VerifySignatureShortKey(t *testing.T) {
 	}
 }
 
+func TestGenerator_VerifySignatureWithoutVerifier(t *testing.T) {
+
+	// a generator without a verifier must reject keys, including the ones it generated itself
+	gen := NewGenerator(WithSigner(HmacSigner(sha1.New, []byte("test_signing_key"), 8)))
+	assertSignature(t, gen, generateKey(t, gen), false)
+	assertSignature(t, gen, []byte("testkeylength_16"), false)
+}
+
 func generateKey(t *testing.T, gen *Generator) []byte {
 	t.Helper()
 
