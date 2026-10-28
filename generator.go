@@ -1,5 +1,7 @@
 package signedkeys
 
+import "fmt"
+
 const (
 	// DefaultKeyLength specifies the default length for generated keys
 	DefaultKeyLength = 16
@@ -41,6 +43,11 @@ func (g *Generator) GenerateKey() ([]byte, error) {
 	res, err := g.rand(g.keyLength)
 	if err != nil {
 		return res, err
+	}
+
+	// VerifySignature splits keys at keyLength, so a key of any other length could never be verified
+	if len(res) != g.keyLength {
+		return nil, fmt.Errorf("random generator returned %d bytes, expected %d", len(res), g.keyLength)
 	}
 
 	signature, err := g.signer(res)
