@@ -145,3 +145,34 @@ func TestDecoder_GenerateSecureKey(t *testing.T) {
 	valid = gen.VerifySignature(key)
 	assert.Equal(t, true, valid)
 }
+
+func TestGenerator_VerifySignatureShortKey(t *testing.T) {
+
+	// keys that decode to fewer than keyLength bytes must be rejected instead of panicking
+	hexGen := NewGenerator(
+		WithVerifier(HmacVerifier(sha1.New, []byte("test_signing_key"), 8)),
+		WithEncoding(HexEncoding()),
+	)
+	for _, key := range []string{"", "ab", "abcd", "00112233445566", "0011223344556677", "00112233445566778899aabbccddee"} {
+		assert.NotPanics(t, func() {
+			assert.Equal(t, false, hexGen.VerifySignature([]byte(key)), key)
+		}, key)
+	}
+
+	base64Gen := NewGenerator(
+		WithVerifier(HmacVerifier(sha1.New, []byte("test_signing_key"), 8)),
+		WithEncoding(Base64Encoding()),
+	)
+	for _, key := range []string{"", "YQ==", "dGVzdGtleQ=="} {
+		assert.NotPanics(t, func() {
+			assert.Equal(t, false, base64Gen.VerifySignature([]byte(key)), key)
+		}, key)
+	}
+
+	noopGen := NewGenerator(WithVerifier(HmacVerifier(sha1.New, []byte("test_signing_key"), 8)))
+	for _, key := range []string{"", "short"} {
+		assert.NotPanics(t, func() {
+			assert.Equal(t, false, noopGen.VerifySignature([]byte(key)), key)
+		}, key)
+	}
+}
