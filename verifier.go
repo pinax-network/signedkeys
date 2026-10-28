@@ -4,6 +4,7 @@ import (
 	"crypto/ed25519"
 	"crypto/hmac"
 	"crypto/subtle"
+	"fmt"
 	"hash"
 )
 
@@ -35,7 +36,13 @@ func HmacVerifier(h func() hash.Hash, signingKey []byte, prefixLength int) Verif
 }
 
 // Ed25519Verifier verifies a key's signature using an ed25519.PublicKey.
+// Note this method will panic if the public key is not ed25519.PublicKeySize bytes long, rather than on every
+// verification as ed25519.Verify would.
 func Ed25519Verifier(publicKey ed25519.PublicKey) Verifier {
+	if len(publicKey) != ed25519.PublicKeySize {
+		panic(fmt.Sprintf("ed25519 public key must be %d bytes long, got %d", ed25519.PublicKeySize, len(publicKey)))
+	}
+
 	return func(key []byte, signature []byte) bool {
 		return ed25519.Verify(publicKey, key, signature)
 	}
