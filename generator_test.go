@@ -130,6 +130,21 @@ func TestDecoder_GenerateSecureKey(t *testing.T) {
 	assertSignature(t, gen, key, true)
 }
 
+func TestGenerator_GenerateKeyRandLength(t *testing.T) {
+
+	// a random generator returning the wrong number of bytes must fail the generation, as the key could never be verified
+	for _, length := range []int{0, DefaultKeyLength - 1, DefaultKeyLength + 1} {
+		gen := NewGenerator(
+			WithRand(func(int) ([]byte, error) { return make([]byte, length), nil }),
+			WithSigner(HmacSigner(sha1.New, []byte("test_signing_key"), 8)),
+			WithVerifier(HmacVerifier(sha1.New, []byte("test_signing_key"), 8)),
+		)
+		if key, err := gen.GenerateKey(); err == nil {
+			t.Errorf("GenerateKey() with a %d byte random generator returned %q, want an error", length, key)
+		}
+	}
+}
+
 func TestGenerator_VerifySignatureShortKey(t *testing.T) {
 
 	// keys that decode to fewer than keyLength bytes must be rejected instead of panicking
