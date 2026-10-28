@@ -17,7 +17,8 @@ type Generator struct {
 }
 
 // NewGenerator returns a new key generator. If no options are specified, it will return a generator using the
-// DefaultKeyLength, Secure random generator, NoopSigner, NoopVerifier and NoopEncoding.
+// DefaultKeyLength, Secure random generator, NoopSigner and NoopEncoding. There is no default verifier: without
+// WithVerifier, VerifySignature rejects every key.
 func NewGenerator(options ...Option) *Generator {
 
 	encoder, decoder := NoopEncoding()
@@ -61,6 +62,11 @@ func (g *Generator) GenerateKey() ([]byte, error) {
 // VerifySignature returns true if the signature embedded in the key is valid. It uses the Verifier that has been
 // set using the WithVerifier option.
 func (g *Generator) VerifySignature(key []byte) bool {
+
+	// a generator without a verifier cannot vouch for any key
+	if g.verifier == nil {
+		return false
+	}
 
 	decodedKey, err := g.decoder(key)
 	if err != nil {
